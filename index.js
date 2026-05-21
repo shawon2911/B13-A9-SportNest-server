@@ -25,7 +25,9 @@ async function run() {
   try {
     await client.connect();
 
+    // creating database
     const db = client.db("sportNest");
+
 
     const allFacilitiesCollection = db.collection("allFacilities");
     const bookingCollection = db.collection("booking");

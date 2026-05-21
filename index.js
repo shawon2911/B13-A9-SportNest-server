@@ -71,6 +71,7 @@ async function run() {
       
 
 
+  // creating a api for delete one data
     app.delete("/booking/:id", async (req, res) => {
       const { id } = req.params;
 

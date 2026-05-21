@@ -1,171 +1,126 @@
-# 🏟️ SportNest — Backend
+# SportNest — Server
 
-> RESTful API server for the SportNest online sports learning platform. Handles course data, user authentication, and profile management.
+REST API for the SportNest sports facility booking platform. Handles facilities, bookings, and user authentication with JWT-based route protection.
 
 ---
 
 ## 🔗 Live API URL
 
-👉 
+[https://sportnest-server.vercel.app](https://sportnest-server.vercel.app)
 
 ---
 
-## 📌 Project Purpose
+## ✨ Features
 
-This is the backend service for SportNest. It exposes a secure REST API consumed by the SportNest frontend. It manages sports course data, user records, and integrates with BetterAuth for authentication flows including Google OAuth.
-
----
-
-## ✨ Key Features
-
-- 📡 **REST API** — Clean endpoints for courses, users, and profiles
-- 🔐 **BetterAuth Integration** — Secure session management, Google OAuth, and credential-based auth
-- 🗄️ **MongoDB** — Persistent data storage via Mongoose
-- 🌍 **CORS Configured** — Accepts requests from the frontend domain only
-- 🔒 **Environment-based Config** — All secrets stored in environment variables
-- 🚀 **Deployed on Vercel** — Serverless-ready Express API
+- Full CRUD for sports facilities (create, read, update, delete)
+- Booking management — create and cancel bookings per user
+- Search by facility name (`$regex`) and filter by sport type (`$in`)
+- JWT generated on login, stored in HTTPOnly cookie
+- Middleware to verify JWT and protect private API routes
+- BetterAuth integration for Google OAuth and credential-based auth
+- Owner-only update and delete enforcement
+- CORS configured for frontend domain
+- No 404/504 errors on any route
 
 ---
 
-## 📁 Project Structure
+## 🛠️ Tech Stack
 
-```
-sportnest-server/
-├── index.js               # Entry point
-├── lib/
-│   └── auth.js            # BetterAuth configuration
-├── routes/
-│   ├── courseRoutes.js    # Course CRUD routes
-│   └── userRoutes.js      # User/profile routes
-├── models/
-│   ├── Course.js          # Course Mongoose model
-│   └── User.js            # User Mongoose model
-├── middleware/
-│   └── verifyToken.js     # Auth middleware
-├── data/
-│   └── courses.json       # Seed data (6+ courses)
-├── .env
-└── package.json
-```
+| Layer | Technology |
+|---|---|
+| Runtime | Node.js |
+| Framework | Express.js |
+| Database | MongoDB Atlas + Mongoose |
+| Auth | BetterAuth + JWT |
+| Deployment | Vercel |
 
 ---
 
-## 🔌 API Endpoints
-
-### Courses
-
-| Method | Endpoint | Description | Auth Required |
-|---|---|---|---|
-| `GET` | `/api/all-facilities` | Get all courses | ❌ |
-| `GET` | `/api/all-facilities/:id` | Get single course by ID | ✅ |
-| `GET` | `/api/facilities?search=title` | Search courses by title | ❌ |
-
-### Users / Profile
-
-| Method | Endpoint | Description | Auth Required |
-|---|---|---|---|
-| `GET` | `/api/users/me` | Get logged-in user profile | ✅ |
-| `PATCH` | `/api/users/me` | Update name & photo URL | ✅ |
-
-### Auth (handled by BetterAuth)
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/auth/sign-in/email` | Email login |
-| `POST` | `/api/auth/sign-up/email` | Email registration |
-| `GET` | `/api/auth/sign-in/google` | Google OAuth redirect |
-| `GET` | `/api/auth/session` | Get current session |
-| `POST` | `/api/auth/sign-out` | Logout |
-
----
-
-## 📦 NPM Packages Used
+## 📦 NPM Packages
 
 | Package | Purpose |
 |---|---|
 | `express` | Web server framework |
 | `mongoose` | MongoDB ODM |
-| `better-auth` | Authentication engine |
-| `cors` | Cross-origin resource sharing |
+| `better-auth` | Auth engine (Google + credentials) |
+| `jsonwebtoken` | JWT generation and verification |
+| `cookie-parser` | HTTPOnly cookie handling |
+| `cors` | Cross-origin request handling |
 | `dotenv` | Environment variable loader |
-| `cookie-parser` | Parse cookies for session handling |
 
 ---
 
-## 🔐 Environment Variables
+## 🔌 API Endpoints
 
-Create a `.env` file in the project root:
+### Facilities
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `GET` | `/all-facilities` | ❌ | Get all facilities (search & filter supported) |
+| `GET` | `/all-facilities/:id` | ❌ | Get single facility |
+| `POST` | `/all-facilities` | ✅ | Add new facility |
+| `PUT` | `/all-facilities/:id` | ✅ Owner only | Update facility |
+| `DELETE` | `/all-facilities/:id` | ✅ Owner only | Delete facility |
+
+### Bookings
+
+| Method | Endpoint | Auth | Description |
+|---|---|---|---|
+| `GET` | `/booking/:userId` | ✅ | Get bookings for logged-in user |
+| `POST` | `/booking` | ✅ | Create a new booking |
+| `PATCH` | `/booking/:id` | ✅ | Cancel a booking |
+
+### Auth (BetterAuth)
+
+| Method | Endpoint | Description |
+|---|---|---|
+| `POST` | `/api/auth/sign-in/email` | Email login |
+| `POST` | `/api/auth/sign-up/email` | Email registration |
+| `GET` | `/api/auth/sign-in/google` | Google OAuth |
+| `GET` | `/api/auth/session` | Get session |
+| `POST` | `/api/auth/sign-out` | Logout |
+
+---
+
+## 🗄️ Database Schema
+
+**facilities**
+```
+name, facility_type, location, price_per_hour,
+capacity, available_slots, description, owner_email, booking_count
+```
+
+**bookings**
+```
+facility_id, user_email, booking_date, time_slot,
+hours, total_price, status (default: "pending")
+```
+
+---
+
+
+
+Create a `.env` file in the root:
 
 ```env
 PORT=5000
-MONGODB_URI=mongodb+srv://your_user:your_password@cluster.mongodb.net/sportnest
+MONGODB_URI=your_mongodb_connection_string
 BETTER_AUTH_SECRET=your_secret_key
-BETTER_AUTH_URL=https://your-backend-url.com
+BETTER_AUTH_URL=your_backend_url
 GOOGLE_CLIENT_ID=your_google_client_id
 GOOGLE_CLIENT_SECRET=your_google_client_secret
-CLIENT_URL=https://sportnest.vercel.app
+JWT_SECRET=your_jwt_secret
+CLIENT_URL=your_frontend_url
 ```
-
-> ⚠️ Never commit `.env` to version control.
 
 ---
 
 ## 🚀 Getting Started
 
 ```bash
-# Clone the repository
-git clone https://github.com/your-username/sportnest-server.git
-cd sportnest-server
-
-# Install dependencies
+git clone https://github.com/shawon2911/B13-A9-SportNest-server
+cd SportNest-server
 npm install
-
-# Set up environment variables
-cp .env.example .env
-# Fill in your values
-
-# Seed the database (optional)
-node data/seed.js
-
-# Start development server
+cp .env.example .env   # fill in your values
 npm run dev
 ```
-
-Server runs at [http://localhost:5000](http://localhost:5000)
-
----
-
-
-
-## 🛠️ Tech Stack
-
-| Technology | Role |
-|---|---|
-| **Node.js** | Runtime environment |
-| **Express.js** | API framework |
-| **MongoDB Atlas** | Cloud database |
-| **Mongoose** | Schema modeling |
-| **BetterAuth** | Auth engine |
-| **Vercel** | Serverless deployment |
-
----
-
-## 🔒 Auth Flow (BetterAuth)
-
-1. User hits `/api/auth/sign-in/email` or `/api/auth/sign-in/google`
-2. BetterAuth validates credentials / OAuth token
-3. A secure session cookie is set
-4. Protected routes check the session via `verifyToken` middleware
-5. On logout, session is destroyed server-side
-
----
-
-## 🤝 Contributing
-
-Pull requests are welcome. For major changes, please open an issue first.
-
----
-
-## 📄 License
-
-This project is for educational purposes. All rights reserved © SportNest 2026.

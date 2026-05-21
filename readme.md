@@ -56,9 +56,9 @@ sportnest-server/
 
 | Method | Endpoint | Description | Auth Required |
 |---|---|---|---|
-| `GET` | `/api/courses` | Get all courses | ❌ |
-| `GET` | `/api/courses/:id` | Get single course by ID | ✅ |
-| `GET` | `/api/courses?search=title` | Search courses by title | ❌ |
+| `GET` | `/api/all-facilities` | Get all courses | ❌ |
+| `GET` | `/api/all-facilities/:id` | Get single course by ID | ✅ |
+| `GET` | `/api/facilities?search=title` | Search courses by title | ❌ |
 
 ### Users / Profile
 

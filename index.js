@@ -35,6 +35,7 @@ async function run() {
     // creating a collection for booking
     const bookingCollection = db.collection("booking");
 
+    // creating a api for get all data
     app.get("/all-facilities", async (req, res) => {
       const result = await allFacilitiesCollection.find().toArray();
       res.json(result);

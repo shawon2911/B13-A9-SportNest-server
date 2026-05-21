@@ -31,6 +31,8 @@ async function run() {
 
     // creating a collection for all facilities
     const allFacilitiesCollection = db.collection("allFacilities");
+
+    // creating a collection for booking
     const bookingCollection = db.collection("booking");
 
     app.get("/all-facilities", async (req, res) => {

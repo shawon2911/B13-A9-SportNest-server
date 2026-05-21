@@ -49,10 +49,20 @@ async function run() {
       res.json(result);
     });
 
-    app.get("/booking", async (req, res) => {
-      const result = await bookingCollection.find().toArray();
-      res.json(result);
-    });
+    app.get("/booking/:id", async (req, res) => {
+     const { id } = req.params;
+     const result = await bookingCollection.find({userId: { $eq: id}}).toArray()
+     res.json(result);
+   });
+
+  // app.get("/booking", async (req, res) => {
+  //   const result = await bookingCollection.find().toArray()
+  //   res.json(result);
+  // })
+    
+
+      
+
 
     app.delete("/booking/:id", async (req, res) => {
       const { id } = req.params;

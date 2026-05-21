@@ -29,6 +29,7 @@ async function run() {
     const db = client.db("sportNest");
 
 
+    // creating a collection for all facilities
     const allFacilitiesCollection = db.collection("allFacilities");
     const bookingCollection = db.collection("booking");
 

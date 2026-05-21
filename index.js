@@ -41,6 +41,7 @@ async function run() {
       res.json(result);
     });
 
+    // creating a api for get all data from all facility
     app.get("/all-facilities/:id", async (req, res) => {
       const { id } = req.params;
       const result = await allFacilitiesCollection.findOne({

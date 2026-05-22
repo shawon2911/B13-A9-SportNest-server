@@ -14,6 +14,8 @@ app.use(cors());
 app.use(express.json());
 
 const client = new MongoClient(uri, {
+   maxPoolSize: 10,
+  minPoolSize: 1,
   serverApi: {
     version: ServerApiVersion.v1,
     strict: true,
@@ -59,6 +61,12 @@ async function run() {
     app.post("/all-facilities", async(req, res) => {
       const newFacilityInfo = req.body;
       const result = await allFacilitiesCollection.insertOne(newFacilityInfo);
+      res.json(result);
+    })
+
+    app.get("/my-facilities/:userEmail", async(req, res) => {
+      const { userEmail } = req.params;
+      const result = await allFacilitiesCollection.find({ownerEmail: { $eq: userEmail}}).toArray()
       res.json(result);
     })
 

@@ -70,6 +70,62 @@ async function run() {
       res.json(result);
     })
 
+    app.delete("/all-facilities/:id", async (req, res) => {
+      const { id } = req.params;
+
+      const result = await allFacilitiesCollection.deleteOne({
+        _id: new ObjectId(id),
+      });
+
+      res.json(result);
+    });
+
+    // app.patch("/all-facilities/:id", async(req, res) => {
+    //   const {id} = req.params;
+    //   const result = await allFacilitiesCollection.updateOne({ _id: id });
+    //   res.json(result);
+    // });
+
+
+
+  app.patch("/all-facilities/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updatedData = req.body;
+
+    const result = await allFacilitiesCollection.updateOne(
+      { _id: new ObjectId(id) },
+      {
+        $set: updatedData,
+      }
+    );
+
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     app.get("/booking/:id", async (req, res) => {
      const { id } = req.params;
      const result = await bookingCollection.find({userId: { $eq: id}}).toArray()

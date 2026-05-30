@@ -5,6 +5,8 @@ const dotenv = require("dotenv");
 const cors = require("cors");
 dotenv.config();
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
+const { createRemoteJWKSet, jwtVerify } = require("jose-cjs");
+const { url } = require("node:inspector");
 const uri = process.env.MONGO_URI;
 
 const app = express();
@@ -23,9 +25,32 @@ const client = new MongoClient(uri, {
   },
 });
 
+const JWKS = createRemoteJWKSet(
+  new URL('http://localhost:3000/api/auth/jwks')
+)
+
+const verifyToken = async(req, res, next) => {
+  const authHeader =  req?.headers.authorization
+  if(!authHeader){
+    return res.status(401).json({ message: "unauthorized" });
+  }
+  const token = authHeader.split(" ")[1]
+  if(!token){
+    return res.status(401).json({ message: "unauthorized" });
+  }
+  try {
+    const {payload} = await jwtVerify(token, JWKS);
+    console.log(payload);
+  } catch (error) {
+    return res.status(403).json({message: "Forbidden"});
+  }
+  // console.log(token);
+  next()
+}
+
 async function run() {
   try {
-    await client.connect();
+    // await client.connect();
 
     // creating database
     const db = client.db("sportNest");
@@ -44,33 +69,37 @@ async function run() {
     });
 
     // creating a api for get all data from all facility
-    app.get("/all-facilities/:id", async (req, res) => {
+    app.get("/all-facilities/:id", verifyToken , async (req, res) => {
       const { id } = req.params;
       const result = await allFacilitiesCollection.findOne({
         _id: new ObjectId(id),
       });
       res.json(result);
-    });
+    } 
+  );
 
-    app.post("/booking", async (req, res) => {
+
+
+
+    app.post("/booking", verifyToken, async (req, res) => {
       const bookingData = req.body;
       const result = await bookingCollection.insertOne(bookingData);
       res.json(result);
     });
 
-    app.post("/all-facilities", async(req, res) => {
+    app.post("/all-facilities", verifyToken,  async(req, res) => {
       const newFacilityInfo = req.body;
       const result = await allFacilitiesCollection.insertOne(newFacilityInfo);
       res.json(result);
     })
 
-    app.get("/my-facilities/:userEmail", async(req, res) => {
+    app.get("/my-facilities/:userEmail", verifyToken , async(req, res) => {
       const { userEmail } = req.params;
       const result = await allFacilitiesCollection.find({ownerEmail: { $eq: userEmail}}).toArray()
       res.json(result);
     })
 
-    app.delete("/all-facilities/:id", async (req, res) => {
+    app.delete("/all-facilities/:id", verifyToken,  async (req, res) => {
       const { id } = req.params;
 
       const result = await allFacilitiesCollection.deleteOne({
@@ -88,7 +117,7 @@ async function run() {
 
 
 
-  app.patch("/all-facilities/:id", async (req, res) => {
+  app.patch("/all-facilities/:id", verifyToken ,  async (req, res) => {
   try {
     const { id } = req.params;
     const updatedData = req.body;
@@ -108,25 +137,7 @@ async function run() {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    app.get("/booking/:id", async (req, res) => {
+    app.get("/booking/:id" , verifyToken , async (req, res) => {
      const { id } = req.params;
      const result = await bookingCollection.find({userId: { $eq: id}}).toArray()
      res.json(result);
@@ -142,7 +153,7 @@ async function run() {
 
 
   // creating a api for delete one data
-    app.delete("/booking/:id", async (req, res) => {
+    app.delete("/booking/:id", verifyToken , async (req, res) => {
       const { id } = req.params;
 
       const result = await bookingCollection.deleteOne({

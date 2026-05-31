@@ -64,8 +64,31 @@ async function run() {
 
     // creating a api for get all data
     app.get("/all-facilities", async (req, res) => {
-      const result = await allFacilitiesCollection.find().toArray();
-      res.json(result);
+      try {
+        const { search = "", sport = "" } = req.query;
+
+        const query = {};
+        if(search){
+          query.name = {
+            $regex: search,
+            $options: "i",
+          };
+        }
+
+        if(sport){
+          query.category = {
+            $in: [sport],
+          };
+        }
+
+        const result = await allFacilitiesCollection.find(query).toArray();
+        res.send(result);
+
+      } catch (error) {
+        res.status(500).send({message: error.message});
+      }
+
+      
     });
 
     // creating a api for get all data from all facility
